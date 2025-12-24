@@ -1,118 +1,173 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuiz } from '../context/QuizContext';
-import { questions } from '../data/questions';
-import TabMonitor from '../components/TabMonitor';
+import { AlertOctagon, CheckCircle } from 'lucide-react';
 
-function StudentQuizPage() {
-  const { submitQuiz } = useQuiz();
-  const navigate = useNavigate();
-  const [currentQ, setCurrentQ] = useState(0);
+export default function StudentQuizPage({ quiz, studentName, onComplete, notify }) {
+  const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(600); // 10 Minutes (600s)
+  const [violations, setViolations] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cheated, setCheated] = useState(false);
 
-  // Timer Logic
+  // Load temp answers
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmit();
-          return 0;
+    const savedAns = localStorage.getItem(`cvsu_quiz_ans_${quiz.id}`);
+    if (savedAns) setAnswers(JSON.parse(savedAns));
+  }, [quiz.id]);
+
+  // Tab Monitor Logic (Built-in)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && !isSubmitting && !cheated) {
+        const newCount = violations + 1;
+        setViolations(newCount);
+        
+        if (newCount === 1) {
+          notify("Warning (1/5): We noticed you switched tabs. You are being watched.", "warning");
+        } else if (newCount === 3) {
+          notify("CRITICAL WARNING (3/5): Further violations will result in automatic failure.", "error");
+        } else if (newCount >= 5) {
+          notify("VIOLATION (5/5): Cheating detected. Quiz Terminated.", "error");
+          setCheated(true);
+          submitQuiz(true); 
         }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+      }
+    };
 
-  const handleSelect = (optionIndex) => {
-    setAnswers({ ...answers, [currentQ]: optionIndex });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [violations, isSubmitting, cheated]);
+
+  const handleAnswer = (option) => {
+    const newAnswers = { ...answers, [quiz.questions[currentQIndex].id]: option };
+    setAnswers(newAnswers);
+    localStorage.setItem(`cvsu_quiz_ans_${quiz.id}`, JSON.stringify(newAnswers));
   };
 
-  const handleSubmit = () => {
-    // Convert answers object to array
-    const finalAnswers = questions.map((_, idx) => answers[idx] ?? -1);
-    submitQuiz(finalAnswers);
-    navigate('/pending');
+  const nextQuestion = () => {
+    if (currentQIndex < quiz.questions.length - 1) {
+      setCurrentQIndex(prev => prev + 1);
+    }
   };
 
-  // Format Timer
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  const calculateScore = () => {
+    let score = 0;
+    quiz.questions.forEach(q => {
+      if (answers[q.id] === q.ans) score++;
+    });
+    return score;
   };
+
+  const submitQuiz = async (isCheater = false) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const finalScore = calculateScore();
+    const status = isCheater ? 'cheated' : 'submitted';
+    const violationsFinal = isCheater ? 5 : violations;
+
+    try {
+      const currentDB = JSON.parse(localStorage.getItem('cvsu_db_results') || '[]');
+      const newRecord = {
+        id: Date.now().toString(),
+        studentName: studentName,
+        quizId: quiz.id,
+        quizTitle: quiz.title,
+        score: finalScore,
+        total: quiz.questions.length,
+        violations: violationsFinal,
+        status: status,
+        released: false, 
+        timestamp: new Date().toISOString()
+      };
+
+      currentDB.push(newRecord);
+      localStorage.setItem('cvsu_db_results', JSON.stringify(currentDB));
+      localStorage.removeItem(`cvsu_quiz_ans_${quiz.id}`); 
+      
+      onComplete();
+    } catch (err) {
+      console.error("Submission error", err);
+      notify("Error saving. Try again.", "error");
+      setIsSubmitting(false);
+    }
+  };
+
+  const currentQ = quiz.questions[currentQIndex];
+  const progress = ((currentQIndex + 1) / quiz.questions.length) * 100;
+  const isAnswerSelected = !!answers[currentQ.id];
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12">
-      <TabMonitor onAutoSubmit={handleSubmit} />
-      
-      {/* Timer Bar */}
-      <div className="sticky top-0 bg-white shadow-sm p-4 z-10 flex justify-center">
-        <div className={`text-xl font-mono font-bold px-6 py-2 rounded-full ${timeLeft < 60 ? 'bg-red-100 text-red-600' : 'bg-indigo-50 text-indigo-700'}`}>
-          ⏰ Time Remaining: {formatTime(timeLeft)}
-        </div>
+    <div className="w-full max-w-3xl">
+      <div className="bg-white rounded-t-xl p-4 flex justify-between items-center border-b border-emerald-100 shadow-sm">
+         <div className="flex items-center gap-2">
+            <span className="font-bold text-emerald-800">{quiz.title}</span>
+         </div>
+         <div className="flex items-center gap-4">
+             <div className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Q {currentQIndex + 1} of {quiz.questions.length}</div>
+             {violations > 0 && (
+                 <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1
+                    ${violations >= 3 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}
+                 `}>
+                    <AlertOctagon className="w-3 h-3" /> Violations: {violations}/5
+                 </div>
+             )}
+         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto mt-8 px-4">
-        {/* Question Card */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="mb-6 flex justify-between items-center text-sm text-slate-500">
-            <span>Question {currentQ + 1} of {questions.length}</span>
-            <span>Progress: {Math.round(((currentQ + 1) / questions.length) * 100)}%</span>
-          </div>
+      <div className="w-full bg-emerald-100 h-2">
+         <div className="bg-yellow-400 h-2 transition-all duration-300" style={{ width: `${progress}%` }}></div>
+      </div>
 
-          <h2 className="text-xl font-bold text-slate-800 mb-8">
-            {questions[currentQ].question}
-          </h2>
+      <div className="bg-white p-6 md:p-10 shadow-lg rounded-b-xl min-h-[400px] flex flex-col justify-between">
+         <div>
+            <h3 className="text-xl md:text-2xl font-bold text-emerald-900 mb-8 leading-relaxed">
+              {currentQIndex + 1}. {currentQ.q}
+            </h3>
 
-          <div className="space-y-3">
-            {questions[currentQ].options.map((opt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSelect(idx)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  answers[currentQ] === idx 
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-semibold' 
-                    : 'border-slate-200 hover:border-indigo-300'
-                }`}
-              >
-                <span className="mr-3 text-slate-400">{String.fromCharCode(65 + idx)}.</span>
-                {opt}
-              </button>
-            ))}
-          </div>
+            <div className="space-y-4">
+              {currentQ.options.map((opt, idx) => {
+                const isSelected = answers[currentQ.id] === opt;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleAnswer(opt)}
+                    onDoubleClick={() => { handleAnswer(opt); nextQuestion(); }}
+                    className={`w-full text-left p-5 rounded-lg border-2 transition-all flex items-center justify-between
+                      ${isSelected 
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-md transform scale-[1.01]' 
+                        : 'bg-white border-emerald-100 text-emerald-800 hover:bg-emerald-50 hover:border-emerald-300'}
+                    `}
+                  >
+                    <span className="font-medium text-lg">{opt}</span>
+                    {isSelected && <CheckCircle className="w-6 h-6 text-white" />}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-emerald-400 mt-4 text-center italic opacity-60">Tip: Double-click an answer to auto-advance</p>
+         </div>
 
-          <div className="mt-8 flex justify-between">
-            <button
-              onClick={() => setCurrentQ(prev => Math.max(0, prev - 1))}
-              disabled={currentQ === 0}
-              className="px-6 py-2 text-slate-600 disabled:opacity-50"
-            >
-              Previous
-            </button>
-            
-            {currentQ === questions.length - 1 ? (
-              <button
-                onClick={handleSubmit}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2 rounded-lg font-bold"
-              >
-                Submit Exam
-              </button>
-            ) : (
-              <button
-                onClick={() => setCurrentQ(prev => Math.min(questions.length - 1, prev + 1))}
-                className="bg-slate-800 hover:bg-slate-900 text-white px-8 py-2 rounded-lg"
-              >
-                Next
-              </button>
-            )}
-          </div>
-        </div>
+         <div className="mt-8 flex justify-end">
+           {currentQIndex < quiz.questions.length - 1 ? (
+             <button 
+               onClick={nextQuestion}
+               disabled={!isAnswerSelected}
+               className={`px-8 py-3 rounded-lg font-bold text-lg transition-colors
+                 ${isAnswerSelected ? 'bg-yellow-400 hover:bg-yellow-500 text-emerald-900' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+               `}
+             >
+               Next Question
+             </button>
+           ) : (
+             <button 
+               onClick={() => submitQuiz(false)}
+               className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg font-bold text-lg shadow-lg"
+             >
+               {isSubmitting ? 'Submitting...' : 'Finish Quiz'}
+             </button>
+           )}
+         </div>
       </div>
     </div>
   );
-}
-
-export default StudentQuizPage;
+            }
