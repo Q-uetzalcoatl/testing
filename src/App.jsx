@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter } from 'react-router-dom'; // FIXED: Added Router to prevent crash
 import { AlertTriangle, LogOut } from 'lucide-react';
 
-// Import Data
+// Import Data (Make sure this path exists!)
 import { QUIZZES } from './data/quizzes';
 
-// Import Pages (Mapped to your folder structure)
+// Import Pages
 import LoginPage from './pages/LoginPage';
+// If these pages don't exist yet, comment them out to test Login first!
 import QuizSelectionPage from './pages/QuizSelectionPage';
 import StudentQuizPage from './pages/StudentQuizPage';
 import ResultPendingPage from './pages/ResultPendingPage';
 import AdminDashboard from './pages/AdminDashboard';
-
-// Password Modal (The only component left)
 import PasswordModal from './components/PasswordModal';
 
 export default function App() {
@@ -43,7 +43,7 @@ export default function App() {
   }, [view, activeQuizId]);
 
   const handleLogin = (name) => {
-    if (!name.trim()) return;
+    if (!name) return;
     localStorage.setItem('cvsu_student_name', name);
     setStudentName(name);
 
@@ -97,55 +97,60 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-emerald-50 text-emerald-900 font-sans selection:bg-yellow-200">
-      {notification && (
-        <div className={`fixed top-5 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-xl border-l-4 animate-bounce
-          ${notification.type === 'error' ? 'bg-red-100 border-red-500 text-red-900' : 'bg-yellow-100 border-yellow-500 text-yellow-900'}
-        `}>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5" />
-            <span className="font-bold">{notification.msg}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Header */}
-      <header className="bg-emerald-700 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
-        <div className="flex items-center gap-3">
-           <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-emerald-900 font-bold text-lg shadow-sm">C</div>
-           <div>
-             <h1 className="text-lg font-bold leading-none">CvSU Portal</h1>
-             <span className="text-xs text-emerald-200 opacity-80">Online Examination System</span>
-           </div>
-        </div>
-        {studentName && (
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex flex-col items-end">
-                <span className="text-xs text-emerald-200">Logged in as</span>
-                <span className="font-bold text-white text-sm">{studentName}</span>
+    // WRAPPER ADDED HERE TO PREVENT CRASH
+    <BrowserRouter>
+      <div className="min-h-screen bg-emerald-50 text-emerald-900 font-sans selection:bg-yellow-200">
+        {notification && (
+          <div className={`fixed top-5 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-xl border-l-4 animate-bounce
+            ${notification.type === 'error' ? 'bg-red-100 border-red-500 text-red-900' : 'bg-yellow-100 border-yellow-500 text-yellow-900'}
+          `}>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              <span className="font-bold">{notification.msg}</span>
             </div>
-            <button onClick={handleLogout} className="bg-emerald-800 hover:bg-emerald-900 p-2 rounded-lg transition-colors border border-emerald-600" title="Logout">
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         )}
-      </header>
 
-      <main className="container mx-auto p-4 md:p-8 flex flex-col items-center">
-        {view === 'login' && <LoginPage onLogin={handleLogin} />}
-        {view === 'dashboard' && <QuizSelectionPage onSelectQuiz={handleSelectQuiz} quizzes={QUIZZES} studentName={studentName} />}
-        {view === 'quiz_password' && <PasswordModal quiz={QUIZZES.find(q => q.id === activeQuizId)} onSuccess={handlePasswordSuccess} onBack={() => setView('dashboard')} />}
-        {view === 'quiz' && (
-          <StudentQuizPage 
-            quiz={QUIZZES.find(q => q.id === activeQuizId)} 
-            studentName={studentName} 
-            onComplete={() => setView('waiting')}
-            notify={showNotification}
-          />
-        )}
-        {view === 'waiting' && <ResultPendingPage studentName={studentName} quizId={activeQuizId} onBack={() => setView('dashboard')} />}
-        {view === 'admin' && <AdminDashboard />}
-      </main>
-    </div>
+        {/* Header */}
+        <header className="bg-emerald-700 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-emerald-900 font-bold text-lg shadow-sm">C</div>
+             <div>
+               <h1 className="text-lg font-bold leading-none">CvSU Portal</h1>
+               <span className="text-xs text-emerald-200 opacity-80">Online Examination System</span>
+             </div>
+          </div>
+          {studentName && (
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex flex-col items-end">
+                  <span className="text-xs text-emerald-200">Logged in as</span>
+                  <span className="font-bold text-white text-sm">{studentName}</span>
+              </div>
+              <button onClick={handleLogout} className="bg-emerald-800 hover:bg-emerald-900 p-2 rounded-lg transition-colors border border-emerald-600" title="Logout">
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </header>
+
+        <main className="container mx-auto p-4 md:p-8 flex flex-col items-center">
+          {/* IMPORTANT: We pass the onLogin prop correctly here */}
+          {view === 'login' && <LoginPage onLogin={handleLogin} />}
+          
+          {view === 'dashboard' && <QuizSelectionPage onSelectQuiz={handleSelectQuiz} quizzes={QUIZZES} studentName={studentName} />}
+          {view === 'quiz_password' && <PasswordModal quiz={QUIZZES.find(q => q.id === activeQuizId)} onSuccess={handlePasswordSuccess} onBack={() => setView('dashboard')} />}
+          {view === 'quiz' && (
+            <StudentQuizPage 
+              quiz={QUIZZES.find(q => q.id === activeQuizId)} 
+              studentName={studentName} 
+              onComplete={() => setView('waiting')}
+              notify={showNotification}
+            />
+          )}
+          {view === 'waiting' && <ResultPendingPage studentName={studentName} quizId={activeQuizId} onBack={() => setView('dashboard')} />}
+          {view === 'admin' && <AdminDashboard />}
+        </main>
+      </div>
+    </BrowserRouter>
   );
-      }
+}
