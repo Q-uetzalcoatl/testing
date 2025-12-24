@@ -1,114 +1,114 @@
 import React, { useState, useEffect } from 'react';
-import { mockDb } from '../data/mockDb';
+import { CheckCircle, Trash2 } from 'lucide-react';
 
-function AdminDashboard() {
-  const [students, setStudents] = useState([]);
-  const [isReleased, setIsReleased] = useState(false);
-
-  // Load data periodically to simulate real-time updates
-  const refreshData = () => {
-    const db = mockDb.getRaw();
-    setStudents(db.students);
-    setIsReleased(db.config.areScoresReleased);
-  };
+export default function AdminDashboard() {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    refreshData();
-    const interval = setInterval(refreshData, 2000); // Auto-refresh every 2s
+    const fetchResults = () => {
+      const data = JSON.parse(localStorage.getItem('cvsu_db_results') || '[]');
+      setResults(data);
+      setLoading(false);
+    };
+
+    fetchResults();
+    const interval = setInterval(fetchResults, 2000); 
     return () => clearInterval(interval);
   }, []);
 
-  const handleToggleRelease = () => {
-    const newState = mockDb.toggleRelease();
-    setIsReleased(newState);
+  const handleDelete = (id) => {
+    if(!window.confirm("Are you sure you want to remove this student's record?")) return;
+    const updated = results.filter(r => r.id !== id);
+    setResults(updated);
+    localStorage.setItem('cvsu_db_results', JSON.stringify(updated));
   };
 
-  const handleReset = () => {
-    if(confirm("Are you sure? This deletes ALL student data.")) {
-      mockDb.resetSystem();
-    }
+  const handleReleaseAll = () => {
+    if(!window.confirm("Release scores for ALL students?")) return;
+    const updated = results.map(r => ({ ...r, released: true }));
+    setResults(updated);
+    localStorage.setItem('cvsu_db_results', JSON.stringify(updated));
+    alert("Scores Released!");
+  };
+
+  const getRowColor = (r) => {
+      if (r.violations >= 5 || r.status === 'cheated') return 'bg-red-50 hover:bg-red-100 border-l-4 border-red-500';
+      if (r.violations >= 3) return 'bg-yellow-50 hover:bg-yellow-100 border-l-4 border-yellow-400';
+      return 'bg-white hover:bg-emerald-50 border-l-4 border-transparent';
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 p-8">
-      <div className="max-w-6xl mx-auto">
-        
-        {/* Header Controls */}
-        <div className="flex justify-between items-center mb-8">
+    <div className="w-full max-w-6xl mt-8">
+       <div className="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Instructor Dashboard</h1>
-            <p className="text-slate-500">Monitor student progress and violations in real-time.</p>
+            <h2 className="text-3xl font-bold text-emerald-900">Instructor Dashboard</h2>
+            <p className="text-emerald-600">Manage student submissions and monitor integrity.</p>
           </div>
-          
-          <div className="flex gap-4">
-            <button 
-              onClick={handleToggleRelease}
-              className={`px-6 py-3 rounded-lg font-bold shadow-sm transition ${
-                isReleased 
-                  ? 'bg-green-100 text-green-700 border border-green-300' 
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
-            >
-              {isReleased ? '✅ Scores Released' : '🔒 Release Results'}
-            </button>
-            <button onClick={handleReset} className="text-red-500 hover:underline">
-              Reset System
-            </button>
-          </div>
-        </div>
+          <button 
+            onClick={handleReleaseAll}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-bold shadow-md flex items-center gap-2 transition-transform hover:scale-105"
+          >
+             <CheckCircle className="w-5 h-5" /> Release All Scores
+          </button>
+       </div>
 
-        {/* Data Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-              <tr>
-                <th className="p-4">Student ID</th>
-                <th className="p-4">Name</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Violations (Tab Switches)</th>
-                <th className="p-4">Score</th>
-                <th className="p-4">Time Submitted</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {students.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="p-8 text-center text-slate-400">No students have joined yet.</td>
-                </tr>
-              )}
-              {students.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50">
-                  <td className="p-4 font-mono text-slate-600">{s.id}</td>
-                  <td className="p-4 font-medium text-slate-800">{s.name}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      s.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {s.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    {/* PDF Requirement: Highlight Violations */}
-                    <span className={`px-3 py-1 rounded-full font-bold ${
-                      s.violations > 0 ? 'bg-red-100 text-red-600' : 'text-slate-400'
-                    }`}>
-                      {s.violations}
-                    </span>
-                  </td>
-                  <td className="p-4 font-bold text-slate-800">
-                    {s.status === 'completed' ? s.score : '-'}
-                  </td>
-                  <td className="p-4 text-sm text-slate-500">
-                    {s.timestamp || 'In Progress...'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+       {loading ? (
+         <div className="text-center py-12 text-emerald-500 font-bold">Loading Class Data...</div>
+       ) : results.length === 0 ? (
+         <div className="text-center py-12 bg-white rounded-xl text-gray-400 italic border border-dashed border-gray-300">
+             No student submissions yet.
+         </div>
+       ) : (
+         <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-emerald-100">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-emerald-800 text-white text-sm uppercase tracking-wider">
+                    <th className="p-4 font-semibold">Student Name</th>
+                    <th className="p-4 font-semibold">Quiz Title</th>
+                    <th className="p-4 font-semibold text-center">Score</th>
+                    <th className="p-4 font-semibold text-center">Violations</th>
+                    <th className="p-4 font-semibold text-center">Status</th>
+                    <th className="p-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-emerald-100">
+                  {results.map((r) => (
+                    <tr key={r.id} className={`transition-colors ${getRowColor(r)}`}>
+                      <td className="p-4 font-bold text-emerald-900">{r.studentName}</td>
+                      <td className="p-4 text-emerald-700 text-sm">{r.quizTitle}</td>
+                      <td className="p-4 text-center font-mono font-bold text-lg">{r.score}/{r.total}</td>
+                      <td className="p-4 text-center">
+                        {r.violations > 0 ? (
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${r.violations >=5 ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}`}>
+                                {r.violations}/5 {r.violations >= 3 && '⚠️'}
+                            </span>
+                        ) : <span className="text-emerald-300">-</span>}
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase
+                            ${r.released ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}
+                        `}>
+                            {r.released ? 'Released' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <button 
+                           onClick={() => handleDelete(r.id)}
+                           className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50"
+                           title="Delete Student Record"
+                        >
+                           <Trash2 className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+         </div>
+       )}
     </div>
   );
-}
-
-export default AdminDashboard;
+                        }
