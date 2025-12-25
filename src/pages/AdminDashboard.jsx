@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, FileCheck, RefreshCw } from 'lucide-react';
+import { Users, FileCheck, RefreshCw, Clock, AlertTriangle } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [results, setResults] = useState([]);
@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="w-full max-w-5xl">
+    <div className="w-full max-w-6xl">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
           <h2 className="text-3xl font-bold text-gray-900">Instructor Dashboard</h2>
@@ -65,18 +65,32 @@ const AdminDashboard = () => {
               <th className="p-4 font-semibold text-gray-600">Student Name</th>
               <th className="p-4 font-semibold text-gray-600">Quiz ID</th>
               <th className="p-4 font-semibold text-gray-600">Score</th>
+              <th className="p-4 font-semibold text-gray-600">Time Spent</th>
+              <th className="p-4 font-semibold text-gray-600">Violations</th>
               <th className="p-4 font-semibold text-gray-600">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {results.length === 0 ? (
-              <tr><td colSpan="4" className="p-8 text-center text-gray-500">No submissions yet.</td></tr>
+              <tr><td colSpan="6" className="p-8 text-center text-gray-500">No submissions yet.</td></tr>
             ) : (
               results.map((r, i) => (
                 <tr key={i} className="hover:bg-gray-50">
                   <td className="p-4 font-medium">{r.studentName}</td>
                   <td className="p-4 text-gray-500">Quiz #{r.quizId}</td>
                   <td className="p-4 font-bold text-emerald-600">{r.score} / {r.total}</td>
+                  <td className="p-4 text-sm text-gray-600 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {r.timeSpent || 'N/A'}
+                  </td>
+                  <td className="p-4">
+                    {r.violations > 0 ? (
+                      <span className="text-red-600 font-bold flex items-center gap-1 text-xs bg-red-50 px-2 py-1 rounded">
+                        <AlertTriangle className="w-3 h-3" /> {r.violations}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
+                  </td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${r.released ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                       {r.released ? 'Released' : 'Pending'}
