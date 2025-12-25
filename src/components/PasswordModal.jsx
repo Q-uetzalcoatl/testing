@@ -5,12 +5,11 @@ const PasswordModal = ({ quiz, onSuccess, onBack }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
 
-  // HARDCODED PASSWORD FOR DEMO
-  const CORRECT_PASSWORD = "cvsu"; 
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (password === CORRECT_PASSWORD) {
+    
+    // UPDATED LOGIC: Check against the specific quiz password
+    if (password === quiz.password) { 
       onSuccess();
     } else {
       setError(true);
@@ -26,7 +25,9 @@ const PasswordModal = ({ quiz, onSuccess, onBack }) => {
             <Lock className="w-6 h-6 text-emerald-600" />
           </div>
           <h3 className="text-lg font-bold text-gray-900">Enter Quiz Password</h3>
-          <p className="text-sm text-gray-500">Please ask your instructor for the access code.</p>
+          <p className="text-sm text-gray-500">
+            Enter the password for <b>{quiz.title}</b>
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
