@@ -1,65 +1,94 @@
 import React, { useState, useEffect } from 'react';
-import { PageContainer, Card, Badge, Button } from '../components/DesignSystem';
+import { Users, FileCheck, RefreshCw } from 'lucide-react';
 
-const AdminDashboard = ({ onLogout }) => {
+const AdminDashboard = () => {
   const [results, setResults] = useState([]);
 
   useEffect(() => {
+    loadResults();
+  }, []);
+
+  const loadResults = () => {
     const data = JSON.parse(localStorage.getItem('cvsu_db_results') || '[]');
     setResults(data);
-  }, []);
+  };
 
   const releaseAll = () => {
     const updated = results.map(r => ({ ...r, released: true }));
-    setResults(updated);
     localStorage.setItem('cvsu_db_results', JSON.stringify(updated));
-    alert("All scores released to students!");
+    setResults(updated);
+    alert("All currently submitted scores have been released to students.");
   };
 
   return (
-    <PageContainer title="Instructor Dashboard" user="Admin" onLogout={onLogout}>
-      <div className="mb-6 flex justify-between items-center">
-        <p className="text-gray-500 text-sm">Overview of student performance</p>
-        <div className="w-40">
-          <Button onClick={releaseAll} variant="secondary">Release All</Button>
+    <div className="w-full max-w-5xl">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Instructor Dashboard</h2>
+          <p className="text-emerald-700">Manage student submissions and release grades.</p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={loadResults} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+            <RefreshCw className="w-4 h-4" /> Refresh
+          </button>
+          <button onClick={releaseAll} className="flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 shadow-md">
+            <FileCheck className="w-4 h-4" /> Release All Scores
+          </button>
         </div>
       </div>
 
-      <Card className="overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-emerald-50 text-emerald-900 font-bold uppercase text-xs">
-              <tr>
-                <th className="px-6 py-4">Student</th>
-                <th className="px-6 py-4">Quiz ID</th>
-                <th className="px-6 py-4">Score</th>
-                <th className="px-6 py-4">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {results.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No submissions yet.</td>
-                </tr>
-              ) : (
-                results.map((r, i) => (
-                  <tr key={i} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{r.studentName}</td>
-                    <td className="px-6 py-4 text-gray-500">{r.quizId}</td>
-                    <td className="px-6 py-4 font-bold text-emerald-700">{r.score} / {r.total}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant={r.released ? "success" : "warning"}>
-                        {r.released ? "Released" : "Pending"}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-100 rounded-lg"><Users className="w-6 h-6 text-blue-600" /></div>
+            <div>
+              <p className="text-sm text-gray-500">Total Students</p>
+              <p className="text-2xl font-bold">{new Set(results.map(r => r.studentName)).size}</p>
+            </div>
+          </div>
         </div>
-      </Card>
-    </PageContainer>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-emerald-100">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-100 rounded-lg"><FileCheck className="w-6 h-6 text-green-600" /></div>
+            <div>
+              <p className="text-sm text-gray-500">Submissions</p>
+              <p className="text-2xl font-bold">{results.length}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <table className="w-full text-left">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="p-4 font-semibold text-gray-600">Student Name</th>
+              <th className="p-4 font-semibold text-gray-600">Quiz ID</th>
+              <th className="p-4 font-semibold text-gray-600">Score</th>
+              <th className="p-4 font-semibold text-gray-600">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {results.length === 0 ? (
+              <tr><td colSpan="4" className="p-8 text-center text-gray-500">No submissions yet.</td></tr>
+            ) : (
+              results.map((r, i) => (
+                <tr key={i} className="hover:bg-gray-50">
+                  <td className="p-4 font-medium">{r.studentName}</td>
+                  <td className="p-4 text-gray-500">Quiz #{r.quizId}</td>
+                  <td className="p-4 font-bold text-emerald-600">{r.score} / {r.total}</td>
+                  <td className="p-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${r.released ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      {r.released ? 'Released' : 'Pending'}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 
