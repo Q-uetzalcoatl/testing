@@ -1,39 +1,35 @@
 import React from 'react';
-import { Lock, ChevronRight } from 'lucide-react';
+import { Lock, Unlock, ChevronRight } from 'lucide-react';
+import { PageContainer, Card, Badge, Button } from '../components/DesignSystem';
 
-export default function QuizSelectionPage({ onSelectQuiz, quizzes, studentName }) {
+const QuizSelectionPage = ({ studentName, quizzes, onSelectQuiz, onLogout }) => {
   return (
-    <div className="w-full max-w-4xl">
-      <div className="mb-8 bg-emerald-800 text-white p-8 rounded-2xl shadow-lg relative overflow-hidden">
-        <div className="relative z-10">
-            <h2 className="text-3xl font-bold mb-2">Welcome back, {studentName}</h2>
-            <p className="text-emerald-200">Select an active examination below to begin.</p>
-        </div>
-        <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
-            <div className="w-64 h-64 bg-yellow-400 rounded-full"></div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {quizzes.map(quiz => (
-          <div key={quiz.id} className="bg-white p-6 rounded-xl shadow-md border border-emerald-100 hover:shadow-xl hover:border-emerald-300 transition-all cursor-pointer group flex flex-col justify-between" onClick={() => onSelectQuiz(quiz.id)}>
-            <div>
-                <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-lg ${quiz.type === 'multiple_choice' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
-                    {quiz.type === 'multiple_choice' ? 'MC' : 'TF'}
-                </div>
-                <Lock className="w-5 h-5 text-gray-300 group-hover:text-emerald-500 transition-colors" />
-                </div>
-                <h3 className="text-xl font-bold text-emerald-900 group-hover:text-emerald-600 mb-2">{quiz.title}</h3>
-                <p className="text-sm text-gray-500">{quiz.questions.length} Questions • Locked</p>
+    <PageContainer user={studentName} onLogout={onLogout} title="Available Examinations">
+      <div className="grid gap-4 md:grid-cols-2">
+        {quizzes.map((quiz) => (
+          <Card key={quiz.id} onClick={() => onSelectQuiz(quiz.id)} className="relative group">
+            <div className="flex justify-between items-start mb-2">
+              <Badge variant={quiz.locked ? "neutral" : "success"}>
+                {quiz.locked ? "Locked" : "Open"}
+              </Badge>
+              {!quiz.locked && <ChevronRight className="text-emerald-400" />}
             </div>
             
-            <button className="mt-6 w-full py-3 rounded-lg bg-emerald-50 text-emerald-700 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-all flex items-center justify-center gap-2">
-                Enter Code <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+            <h3 className="text-lg font-bold text-gray-800 mb-1 group-hover:text-emerald-700 transition-colors">
+              {quiz.title}
+            </h3>
+            <p className="text-sm text-gray-500">{quiz.questions.length} Questions • {quiz.timeLimit || "No"} mins</p>
+            
+            {quiz.locked && (
+              <div className="absolute inset-0 bg-gray-50/50 flex items-center justify-center backdrop-blur-[1px] rounded-xl">
+                <Lock className="text-gray-400" />
+              </div>
+            )}
+          </Card>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
-              }
+};
+
+export default QuizSelectionPage;
