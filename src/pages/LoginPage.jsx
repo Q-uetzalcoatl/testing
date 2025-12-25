@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
 
-// IMPORT YOUR NEW DESIGN SYSTEM
 import { 
   PageContainer, 
   Card, 
-  PageTitle, 
-  PageSubtitle, 
   Button, 
   InputGroup, 
   ToggleSwitch 
@@ -32,15 +29,17 @@ const LoginPage = ({ onLogin }) => {
 
   return (
     <PageContainer>
-      <Card className="mt-8">
+      <Card className="mt-8 max-w-md mx-auto">
         
-        {/* Title Section */}
-        <PageTitle>
-          {isAdminMode ? 'Instructor Portal' : 'Student Entry'}
-        </PageTitle>
-        <PageSubtitle>
-          {isAdminMode ? 'Manage quizzes and view results' : 'Sign in to start your examination'}
-        </PageSubtitle>
+        {/* TITLE SECTION (Fixed: Using standard HTML instead of missing components) */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-emerald-900 mb-2">
+            {isAdminMode ? 'Instructor Portal' : 'Student Entry'}
+          </h2>
+          <p className="text-gray-500 text-sm">
+            {isAdminMode ? 'Manage quizzes and view results' : 'Sign in to start your examination'}
+          </p>
+        </div>
 
         {/* The Toggle Switch */}
         <ToggleSwitch 
@@ -70,7 +69,7 @@ const LoginPage = ({ onLogin }) => {
           />
 
           <div className="mt-6">
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" fullWidth>
               Sign In
             </Button>
           </div>
