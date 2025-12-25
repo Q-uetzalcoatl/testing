@@ -8,7 +8,8 @@ const PasswordModal = ({ quiz, onSuccess, onBack }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // UPDATED LOGIC: Check against the specific quiz password
+    // Check against the password stored in quizzes.js
+    // quiz.password is now 'dcit' (Quiz 1) or 'cvsu' (Quiz 2)
     if (password === quiz.password) { 
       onSuccess();
     } else {
@@ -26,7 +27,7 @@ const PasswordModal = ({ quiz, onSuccess, onBack }) => {
           </div>
           <h3 className="text-lg font-bold text-gray-900">Enter Quiz Password</h3>
           <p className="text-sm text-gray-500">
-            Enter the password for <b>{quiz.title}</b>
+            Please enter the access code for <b>{quiz.title}</b>.
           </p>
         </div>
 
