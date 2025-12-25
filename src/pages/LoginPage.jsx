@@ -11,18 +11,16 @@ const LoginPage = ({ onLogin, notify }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
+    setError('');
 
     if (isAdminMode) {
-      // ADMIN VALIDATION
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
         onLogin('Admin');
       } else {
-        setError('Invalid Admin Credentials. Please check email/password.');
+        setError('Invalid Admin Credentials.');
         notify('Login Failed', 'error');
       }
     } else {
-      // STUDENT VALIDATION
       const foundStudent = STUDENTS.find(
         s => s.email.toLowerCase() === email.toLowerCase() && s.studentId === studentId
       );
@@ -30,7 +28,7 @@ const LoginPage = ({ onLogin, notify }) => {
       if (foundStudent) {
         onLogin(foundStudent.name);
       } else {
-        setError('Student not found. Please check Email and Student ID.');
+        setError('Student not found. Check credentials.');
         notify('Access Denied', 'error');
       }
     }
@@ -38,66 +36,40 @@ const LoginPage = ({ onLogin, notify }) => {
 
   return (
     <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 mt-10">
-      
-      {/* Header Section */}
       <div className="text-center mb-8">
         <div className="mx-auto h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-          {isAdminMode ? (
-            <Shield className="h-6 w-6 text-emerald-600" />
-          ) : (
-            <GraduationCap className="h-6 w-6 text-emerald-600" />
-          )}
+          {isAdminMode ? <Shield className="h-6 w-6 text-emerald-600" /> : <GraduationCap className="h-6 w-6 text-emerald-600" />}
         </div>
         <h2 className="text-3xl font-extrabold text-gray-900">
           {isAdminMode ? 'Instructor Portal' : 'Student Entry'}
         </h2>
         <p className="mt-2 text-sm text-gray-600">
-          {isAdminMode 
-            ? 'Secure access for faculty members' 
-            : 'Sign in to access your dashboard'}
+          {isAdminMode ? 'Secure access for faculty members' : 'Sign in to access your dashboard'}
         </p>
       </div>
 
-      {/* Toggle Admin/Student Mode */}
       <div className="flex bg-gray-100 p-1 rounded-lg mb-8">
         <button
           type="button"
           onClick={() => { setIsAdminMode(false); setError(''); }}
-          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-            !isAdminMode 
-              ? 'bg-white text-gray-900 shadow-sm' 
-              : 'text-gray-500 hover:text-gray-900'
-          }`}
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${!isAdminMode ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
         >
           Student
         </button>
         <button
           type="button"
           onClick={() => { setIsAdminMode(true); setError(''); }}
-          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-            isAdminMode 
-              ? 'bg-white text-gray-900 shadow-sm' 
-              : 'text-gray-500 hover:text-gray-900'
-          }`}
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${isAdminMode ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
         >
           Instructor
         </button>
       </div>
 
-      {/* Login Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* Error Message */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg text-center font-medium">
-            {error}
-          </div>
-        )}
+        {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg text-center">{error}</div>}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <User className="h-5 w-5 text-gray-400" />
@@ -106,19 +78,16 @@ const LoginPage = ({ onLogin, notify }) => {
               type="email"
               required
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder={isAdminMode ? "admin@cvsu.edu.ph" : "student@cvsu.edu.ph"}
+              placeholder="username@cvsu.edu.ph"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>
 
-        {/* CONDITIONAL INPUTS */}
         {isAdminMode ? (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Lock className="h-5 w-5 text-gray-400" />
@@ -135,9 +104,7 @@ const LoginPage = ({ onLogin, notify }) => {
           </div>
         ) : (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Student ID Number
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Student ID Number</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <CreditCard className="h-5 w-5 text-gray-400" />
@@ -146,7 +113,7 @@ const LoginPage = ({ onLogin, notify }) => {
                 type="text"
                 required
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="2025000"
+                placeholder="Ex: 2024100"
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
               />
@@ -154,10 +121,7 @@ const LoginPage = ({ onLogin, notify }) => {
           </div>
         )}
 
-        <button
-          type="submit"
-          className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
-        >
+        <button type="submit" className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700">
           Sign In
         </button>
       </form>
