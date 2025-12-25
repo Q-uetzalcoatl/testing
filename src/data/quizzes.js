@@ -3,7 +3,7 @@ export const QUIZZES = [
     id: 'quiz_cvsu_1',
     title: 'CvSU Short Quiz',
     type: 'multiple_choice',
-    password: 'wdvD12w3', 
+    password: 'multiple', 
     questions: [
       { id: 1, q: "What is the primary output device of a computer?", options: ["Mouse", "Monitor", "Keyboard", "CPU"], ans: "Monitor" },
       { id: 2, q: "Which color is #FFFFFF?", options: ["Black", "Green", "White", "Yellow"], ans: "White" },
@@ -21,7 +21,7 @@ export const QUIZZES = [
     id: 'quiz_logic_1',
     title: 'Logic & Facts (True/False)',
     type: 'true_false',
-    password: 'cvsu2024', 
+    password: 'truefalse', 
     questions: [
       { id: 1, q: "The sky is usually green.", options: ["True", "False"], ans: "False" },
       { id: 2, q: "Fire is hot.", options: ["True", "False"], ans: "True" },
