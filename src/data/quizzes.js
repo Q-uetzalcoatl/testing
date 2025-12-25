@@ -5,7 +5,7 @@ export const QUIZZES = [
     subject: "DCIT 26",
     description: "Application Development and Emerging Technologies",
     duration: 60,
-    password: "dcit26",
+    password: "dcit", // Password for this quiz
     questions: [
       {
         id: 1,
@@ -75,7 +75,7 @@ export const QUIZZES = [
     subject: "IT 101",
     description: "Introduction to Computing (True or False)",
     duration: 45,
-    password: "it101",
+    password: "cvsu", // Password for this quiz
     questions: [
       {
         id: 1,
