@@ -10,7 +10,7 @@ export const PageContainer = ({ children, title, user, onLogout }) => (
       <div className="max-w-4xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-yellow-400 rounded-lg flex items-center justify-center text-emerald-900 font-bold shadow-sm">
-            C
+            CVSU
           </div>
           <div>
             <h1 className="font-bold text-lg leading-tight tracking-wide">CvSU Portal</h1>
@@ -21,7 +21,7 @@ export const PageContainer = ({ children, title, user, onLogout }) => (
         {user && (
           <div className="flex items-center gap-3">
              <div className="text-right hidden sm:block">
-                <p className="text-xs text-emerald-200">Signed in as</p>
+                <p className="text-xs text-emerald-200">Signed in as </p>
                 <p className="font-bold text-sm">{user}</p>
              </div>
              <button onClick={onLogout} className="p-2 bg-emerald-800 rounded-md hover:bg-emerald-600 border border-emerald-600 transition-colors">
