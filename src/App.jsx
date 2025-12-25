@@ -121,7 +121,7 @@ export default function App() {
           {studentName && (
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-xs text-emerald-200">Logged in as</span>
+                  <span className="text-xs text-emerald-200">Logged in as </span>
                   <span className="font-bold text-white text-sm">{studentName}</span>
               </div>
               <button onClick={handleLogout} className="bg-emerald-800 hover:bg-emerald-900 p-2 rounded-lg transition-colors border border-emerald-600" title="Logout">
