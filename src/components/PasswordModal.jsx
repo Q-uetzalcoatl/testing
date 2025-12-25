@@ -1,43 +1,61 @@
 import React, { useState } from 'react';
+import { Lock } from 'lucide-react';
+import { PageContainer, Card, Button, InputGroup } from './DesignSystem';
 
-export default function PasswordModal({ quiz, onSuccess, onBack }) {
-  const [code, setCode] = useState('');
+const PasswordModal = ({ quiz, onSuccess, onBack }) => {
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (code === quiz.password) {
+    if (password === quiz.accessCode) {
       onSuccess();
     } else {
-      setError('Invalid Access Code');
-      setCode('');
+      setError('Incorrect access code. Please try again.');
+      setPassword('');
     }
   };
 
   return (
-    <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-emerald-100 mt-10">
-      <button onClick={onBack} className="text-xs font-bold text-gray-400 hover:text-emerald-600 mb-6 flex items-center gap-1">
-          ← BACK TO DASHBOARD
-      </button>
-      <h2 className="text-xl font-bold text-emerald-800 mb-1">Enter Quiz Password</h2>
-      <p className="text-gray-500 mb-6 text-sm">Restricted access for <strong>{quiz.title}</strong>.</p>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="relative">
-            <input 
-            type="password" 
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="w-full p-4 border-2 border-emerald-100 rounded-lg text-center text-2xl tracking-[0.5em] font-mono font-bold focus:border-yellow-400 focus:outline-none transition-colors"
-            placeholder="••••••"
-            autoFocus
+    <PageContainer>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <Card className="w-full max-w-md animate-in fade-in zoom-in duration-200">
+          
+          <div className="text-center mb-6">
+            <div className="mx-auto w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-3">
+              <Lock size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">Enter Access Code</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Please enter the code for <strong>{quiz.title}</strong>
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <InputGroup 
+              label="Access Code"
+              type="password"
+              placeholder="Enter code provided by instructor"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-        </div>
-        {error && <p className="text-red-500 text-center font-bold text-sm bg-red-50 py-2 rounded">{error}</p>}
-        <button type="submit" className="w-full bg-yellow-400 hover:bg-yellow-500 text-emerald-900 font-bold py-4 rounded-lg shadow transition-colors uppercase tracking-wide text-sm">
-          Unlock & Start
-        </button>
-      </form>
-    </div>
+            
+            {error && <p className="text-red-500 text-sm font-bold mb-4 text-center">{error}</p>}
+
+            <div className="flex gap-3 mt-6">
+              <Button type="button" onClick={onBack} variant="secondary" className="flex-1">
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" className="flex-1">
+                Start Quiz
+              </Button>
+            </div>
+          </form>
+
+        </Card>
+      </div>
+    </PageContainer>
   );
-}
+};
+
+export default PasswordModal;
