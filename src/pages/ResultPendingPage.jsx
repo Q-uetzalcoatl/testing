@@ -1,52 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { Clock, CheckCircle } from 'lucide-react';
-import { PageContainer, Card, Button, Badge } from '../components/DesignSystem';
+import React from 'react';
+import { Hourglass, CheckCircle } from 'lucide-react';
 
-const ResultPendingPage = ({ studentName, quizId, onBack, onLogout }) => {
-  const [result, setResult] = useState(null);
-
-  useEffect(() => {
-    const allResults = JSON.parse(localStorage.getItem('cvsu_db_results') || '[]');
-    const myResult = allResults.find(r => r.studentName === studentName && r.quizId === quizId);
-    setResult(myResult);
-  }, [studentName, quizId]);
-
-  if (!result) return <div>Loading...</div>;
+const ResultPendingPage = ({ studentName, quizId, onBack }) => {
+  // Check if result is released
+  const allResults = JSON.parse(localStorage.getItem('cvsu_db_results') || '[]');
+  const myResult = allResults.find(r => r.studentName === studentName && r.quizId === quizId);
+  
+  const isReleased = myResult && myResult.released;
 
   return (
-    <PageContainer user={studentName} onLogout={onLogout}>
-      <Card className="text-center py-10">
-        
-        {/* If Released: Show Score. If Not: Show Clock */}
-        <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-6 ${result.released ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-          {result.released ? <CheckCircle size={40} /> : <Clock size={40} />}
-        </div>
-
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {result.released ? "Examination Results" : "Submission Successful"}
-        </h2>
-        
-        <p className="text-gray-500 mb-8 px-4">
-          {result.released 
-            ? "Your instructor has released the scores for this examination." 
-            : "Your answers have been recorded. Please wait for the instructor to release the scores."}
-        </p>
-
-        {/* The Score Box */}
-        {result.released && (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6 mb-8 max-w-xs mx-auto">
-            <p className="text-sm font-bold text-emerald-800 uppercase tracking-widest mb-1">Your Score</p>
-            <p className="text-5xl font-extrabold text-emerald-600">
-              {result.score} <span className="text-xl text-emerald-400">/ {result.total}</span>
-            </p>
+    <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-10 text-center">
+      {isReleased ? (
+        <>
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-        )}
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Score Released!</h2>
+          <p className="text-gray-500 mb-8">You scored </p>
+          <div className="text-6xl font-black text-emerald-600 mb-8">
+            {myResult.score} <span className="text-2xl text-gray-400">/ {myResult.total}</span>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <Hourglass className="w-10 h-10 text-amber-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Submission Successful</h2>
+          <p className="text-gray-600 mb-8">
+            Your exam has been submitted safely. Please wait for the instructor to release the results.
+          </p>
+        </>
+      )}
 
-        <div className="flex justify-center gap-4">
-          <Button onClick={onBack} variant="secondary">Back to Dashboard</Button>
-        </div>
-      </Card>
-    </PageContainer>
+      <button
+        onClick={onBack}
+        className="w-full py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800"
+      >
+        Return to Dashboard
+      </button>
+    </div>
   );
 };
 
