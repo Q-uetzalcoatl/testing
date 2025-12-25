@@ -19,11 +19,11 @@ export default function App() {
   const [activeQuizId, setActiveQuizId] = useState(null);
   const [notification, setNotification] = useState(null);
 
-  // Initialize from LocalStorage
+  // Initialize from sessionStorage (Tab Specific)
   useEffect(() => {
-    const savedName = localStorage.getItem('cvsu_student_name');
-    const savedView = localStorage.getItem('cvsu_current_view');
-    const savedQuizId = localStorage.getItem('cvsu_active_quiz');
+    const savedName = sessionStorage.getItem('cvsu_student_name');
+    const savedView = sessionStorage.getItem('cvsu_current_view');
+    const savedQuizId = sessionStorage.getItem('cvsu_active_quiz');
     
     if (savedName) setStudentName(savedName);
     if (savedQuizId) setActiveQuizId(savedQuizId);
@@ -35,18 +35,18 @@ export default function App() {
     }
   }, []);
 
-  // Save State
+  // Save State to sessionStorage
   useEffect(() => {
-    if (view !== 'login') localStorage.setItem('cvsu_current_view', view);
-    if (activeQuizId) localStorage.setItem('cvsu_active_quiz', activeQuizId);
+    if (view !== 'login') sessionStorage.setItem('cvsu_current_view', view);
+    if (activeQuizId) sessionStorage.setItem('cvsu_active_quiz', activeQuizId);
   }, [view, activeQuizId]);
 
   const handleLogin = (name) => {
     if (!name) return;
-    localStorage.setItem('cvsu_student_name', name);
+    sessionStorage.setItem('cvsu_student_name', name);
     setStudentName(name);
 
-    if (name.toLowerCase() === 'admin') {
+    if (name === 'Admin') {
       setView('admin');
     } else {
       setView('dashboard');
@@ -54,6 +54,8 @@ export default function App() {
   };
 
   const handleSelectQuiz = (quizId) => {
+    // Note: Results should still use localStorage so they persist across reloads/sessions
+    // Otherwise, restarting the browser would delete all student grades!
     const allResults = JSON.parse(localStorage.getItem('cvsu_db_results') || '[]');
     const existingAttempt = allResults.find(r => r.studentName === studentName && r.quizId === quizId);
 
@@ -83,7 +85,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear(); // Clears only this tab
     setStudentName('');
     setActiveQuizId(null);
     setView('login');
@@ -112,7 +114,7 @@ export default function App() {
         {/* Header */}
         <header className="bg-emerald-700 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-emerald-900 font-bold text-lg shadow-sm">C</div>
+             <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-emerald-900 font-bold text-lg shadow-sm">CVSU</div>
              <div>
                <h1 className="text-lg font-bold leading-none">CvSU Portal</h1>
                <span className="text-xs text-emerald-200 opacity-80">Online Examination System</span>
@@ -121,7 +123,7 @@ export default function App() {
           {studentName && (
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-xs text-emerald-200">Logged in as </span>
+                  <span className="text-xs text-emerald-200">Logged in as</span>
                   <span className="font-bold text-white text-sm">{studentName}</span>
               </div>
               <button onClick={handleLogout} className="bg-emerald-800 hover:bg-emerald-900 p-2 rounded-lg transition-colors border border-emerald-600" title="Logout">
@@ -132,7 +134,7 @@ export default function App() {
         </header>
 
         <main className="container mx-auto p-4 md:p-8 flex flex-col items-center">
-          {view === 'login' && <LoginPage onLogin={handleLogin} />}
+          {view === 'login' && <LoginPage onLogin={handleLogin} notify={showNotification} />}
           {view === 'dashboard' && <QuizSelectionPage onSelectQuiz={handleSelectQuiz} quizzes={QUIZZES} studentName={studentName} />}
           {view === 'quiz_password' && <PasswordModal quiz={QUIZZES.find(q => q.id === activeQuizId)} onSuccess={handlePasswordSuccess} onBack={() => setView('dashboard')} />}
           {view === 'quiz' && (
@@ -149,4 +151,4 @@ export default function App() {
       </div>
     </BrowserRouter>
   );
-          }
+              }
