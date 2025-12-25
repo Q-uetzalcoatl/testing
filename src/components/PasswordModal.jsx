@@ -1,60 +1,68 @@
 import React, { useState } from 'react';
 import { Lock } from 'lucide-react';
-import { PageContainer, Card, Button, InputGroup } from './DesignSystem';
 
 const PasswordModal = ({ quiz, onSuccess, onBack }) => {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
+
+  // HARDCODED PASSWORD FOR DEMO
+  const CORRECT_PASSWORD = "cvsu"; 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (password === quiz.accessCode) {
+    if (password === CORRECT_PASSWORD) {
       onSuccess();
     } else {
-      setError('Incorrect access code. Please try again.');
+      setError(true);
       setPassword('');
     }
   };
 
   return (
-    <PageContainer>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-        <Card className="w-full max-w-md animate-in fade-in zoom-in duration-200">
-          
-          <div className="text-center mb-6">
-            <div className="mx-auto w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-3">
-              <Lock size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900">Enter Access Code</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Please enter the code for <strong>{quiz.title}</strong>
-            </p>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Lock className="w-6 h-6 text-emerald-600" />
           </div>
+          <h3 className="text-lg font-bold text-gray-900">Enter Quiz Password</h3>
+          <p className="text-sm text-gray-500">Please ask your instructor for the access code.</p>
+        </div>
 
-          <form onSubmit={handleSubmit}>
-            <InputGroup 
-              label="Access Code"
-              type="password"
-              placeholder="Enter code provided by instructor"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            
-            {error && <p className="text-red-500 text-sm font-bold mb-4 text-center">{error}</p>}
-
-            <div className="flex gap-3 mt-6">
-              <Button type="button" onClick={onBack} variant="secondary" className="flex-1">
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary" className="flex-1">
-                Start Quiz
-              </Button>
-            </div>
-          </form>
-
-        </Card>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError(false);
+            }}
+            placeholder="Enter password..."
+            className={`w-full p-3 border rounded-lg text-center text-lg tracking-widest mb-4 outline-none focus:ring-2 ${
+              error ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-emerald-200'
+            }`}
+            autoFocus
+          />
+          {error && <p className="text-red-500 text-xs text-center mb-4">Incorrect password. Try again.</p>}
+          
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex-1 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+            >
+              Start Quiz
+            </button>
+          </div>
+        </form>
       </div>
-    </PageContainer>
+    </div>
   );
 };
 
