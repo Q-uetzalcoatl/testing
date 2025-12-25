@@ -7,7 +7,6 @@ import { QUIZZES } from './data/quizzes';
 
 // Import Pages
 import LoginPage from './pages/LoginPage';
-// If these pages don't exist yet, comment them out to test Login first!
 import QuizSelectionPage from './pages/QuizSelectionPage';
 import StudentQuizPage from './pages/StudentQuizPage';
 import ResultPendingPage from './pages/ResultPendingPage';
@@ -114,7 +113,7 @@ export default function App() {
         {/* Header */}
         <header className="bg-emerald-700 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-emerald-900 font-bold text-lg shadow-sm">C</div>
+             <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-emerald-900 font-bold text-lg shadow-sm">CVSU</div>
              <div>
                <h1 className="text-lg font-bold leading-none">CvSU Portal</h1>
                <span className="text-xs text-emerald-200 opacity-80">Online Examination System</span>
@@ -123,7 +122,7 @@ export default function App() {
           {studentName && (
             <div className="flex items-center gap-4">
               <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-xs text-emerald-200">Logged in as</span>
+                  <span className="text-xs text-emerald-200">Logged in as </span>
                   <span className="font-bold text-white text-sm">{studentName}</span>
               </div>
               <button onClick={handleLogout} className="bg-emerald-800 hover:bg-emerald-900 p-2 rounded-lg transition-colors border border-emerald-600" title="Logout">
