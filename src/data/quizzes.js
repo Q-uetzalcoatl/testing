@@ -4,7 +4,7 @@ export const QUIZZES = [
     title: "Midterm Examination",
     subject: "DCIT 26",
     description: "Application Development and Emerging Technologies",
-    duration: 60,
+    duration: 20,
     password: "dcit", // Password for this quiz
     questions: [
       {
@@ -74,7 +74,7 @@ export const QUIZZES = [
     title: "Final Project Quiz",
     subject: "IT 101",
     description: "Introduction to Computing (True or False)",
-    duration: 45,
+    duration: 15,
     password: "cvsu", // Password for this quiz
     questions: [
       {
