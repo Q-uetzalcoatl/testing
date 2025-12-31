@@ -112,7 +112,7 @@ export default function App() {
           <div className="flex items-center gap-3">
              {/* LOGO UPDATE: Replaced text div with actual image */}
              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md overflow-hidden p-0.5">
-                <img src="/cvsu.png" alt="CvSU Logo" className="w-full h-full object-cover" />
+                <img src="/cvsulogo.png" alt="CvSU" className="w-full h-full object-cover" />
              </div>
              <div>
                <h1 className="text-lg font-bold leading-none tracking-wide">CvSU Portal</h1>
